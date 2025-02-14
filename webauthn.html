@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAuthn 註冊與驗證</title>
+</head>
+<body>
+    <h2>WebAuthn 註冊與驗證測試</h2>
+    <button onclick="registerWebAuthn()">註冊 (Register)</button>
+    <button onclick="authenticateWebAuthn()">驗證 (Authenticate)</button>
+    <p id="output"></p>
+
+    <script>
+        function base64UrlToUint8Array(base64Url) {
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        }
+        const credentialId = base64UrlToUint8Array("1louFDJDDUIEVPs0IuDp_zCzoF9jKr6WW40-2OOYlMJym4rrth1v6_sf7xYzZnd-38BN4u3nwIznOgkswR2M2w");
+        console.log(credentialId);
+        async function registerWebAuthn() {
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            const publicKey = {
+                challenge: challenge,
+                rp: { id: "localhost", name: "WebAuthn 測試" },
+                user: {
+                    id: new Uint8Array(16),
+                    name: "testuser3@example.com",
+                    displayName: "Test User3"
+                },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                authenticatorSelection: { residentKey: "required", userVerification: "required" ,authenticatorAttachment: "cross-platform" },
+                timeout: 60000,
+                attestation: "direct"
+            };
+
+            try {
+                const credential = await navigator.credentials.create({ publicKey });
+                document.getElementById("output").innerText = "註冊成功: " + JSON.stringify(credential);
+                let transports = credential.response.getTransports ? credential.response.getTransports() : [];
+                console.log("使用的傳輸方式:", transports);
+            } catch (err) {
+                document.getElementById("output").innerText = "註冊失敗: " + err.message;
+            }
+        }
+
+        async function authenticateWebAuthn() {
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            const publicKey = {
+                challenge: challenge,
+                allowCredentials: [{ id: base64UrlToUint8Array("K1ZMw7P6UCB-o5S3Ex4BriTSnhRCJuZ2adAPfaAUfDRAaR2HOsyxld2dcIukCbgvIJ14cgtRXPKgphTgCrEaEg"), 
+                                     type: "public-key", 
+                                     transports: ["usb", "nfc"] }],
+                timeout: 60000,
+                userVerification: "preferred" // "required" or "discouraged"
+            };
+
+            try {
+                const assertion = await navigator.credentials.get({ publicKey });
+                document.getElementById("output").innerText = "驗證成功: " + JSON.stringify(assertion);
+            } catch (err) {
+                document.getElementById("output").innerText = "驗證失敗: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
