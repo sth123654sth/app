@@ -23,7 +23,7 @@
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
 
-            const rpId = window.location.hostname.includes(".github.io") ? "github.io" : window.location.hostname;
+            const rpId = window.location.hostname.includes(".github.io") ? "sth123654sth.github.io" : window.location.hostname;
             const publicKey = {
                 challenge: challenge,
                 rp: { id: rpId,
@@ -35,7 +35,7 @@
                     displayName: "Test User3"
                 },
                 pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-                authenticatorSelection: { residentKey: "required", userVerification: "required" ,authenticatorAttachment: "cross-platform" },
+                authenticatorSelection: { residentKey: "required", userVerification: "required"},
                 timeout: 60000,
                 attestation: "direct"
             };
