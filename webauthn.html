@@ -22,14 +22,11 @@
         async function registerWebAuthn() {
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
-            const rpIds = {
-              "github.io": "github.io",
-              "sth123654sth.github.io": "sth123654sth.github.io"
-            };
-            const currentRpId = rpIds[window.location.hostname];
+
+            const rpId = window.location.hostname.includes(".github.io") ? "github.io" : window.location.hostname;
             const publicKey = {
                 challenge: challenge,
-                rp: currentRpId,
+                rp: rpId,
                 user: {
                     id: new Uint8Array(16),
                     name: "testuser3@example.com",
